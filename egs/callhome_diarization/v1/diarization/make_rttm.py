@@ -80,7 +80,32 @@ def main():
           reco2segs[reco] = reco + " " + start + "," + end + "," + seg2label[seg]
       except KeyError:
         raise RuntimeError("Missing label for segment {0}".format(seg))
+  
+ # sort segment based on start time
+  for reco in sorted(reco2segs):
+    segs = reco2segs[reco].strip().split()
+    startSeq = {}
+    record = []
+    for i in range(1,len(segs)):
+        start,end,label = segs[i].split(',')
+        record.append(float(start))
+        if float(start) not in startSeq:
+            startSeq[float(start)] = [[start,end,label]]
+        else:
+            pos=0
+            for i in range(0,len(startSeq[float(start)])):
+                pos+=1
+                if float(startSeq[float(start)][i][2])>float(end):
+                    break
+            startSeq[float(start)].insert(pos,[start,end,lable])
+    record.sort()
 
+    newSegs=segs[0]+" "
+    for r in record:
+        start = startSeq[r]
+        newSegs+=" ".join([",".join(s) for s in start])+" "
+    reco2segs[reco] = newSegs
+  
   # Cut up overlapping segments so they are contiguous
   contiguous_segs = []
   for reco in sorted(reco2segs):
